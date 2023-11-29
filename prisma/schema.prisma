@@ -1,0 +1,40 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Event {
+  id          String   @id
+  name        String
+  aggregateId String
+  data        Json
+  createdAt   DateTime @default(now())
+
+  @@map("events")
+}
+
+model EventProcessingAttempt {
+  id            String                @id @default(uuid())
+  processorName String
+  eventId       String
+  status        EventProcessingStatus
+  createdAt     DateTime              @default(now())
+  finishedAt    DateTime?
+  error         Json?
+
+  @@index([eventId, processorName])
+  @@map("event_processing_attempts")
+}
+
+enum EventProcessingStatus {
+  IN_PROGRESS
+  SUCCESS
+  FAILED
+}
